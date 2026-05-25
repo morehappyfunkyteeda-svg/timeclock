@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>タイムレコーダー — ウェルフォース訪問看護ステーション</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f0;min-height:100vh;}
+.wrap{max-width:480px;margin:0 auto;padding:1rem;}
+.card{background:#fff;border:1px solid #e0e0d8;border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+.clock-box{background:#f0f0ea;border:1px solid #e0e0d8;border-radius:12px;padding:1.5rem;text-align:center;margin-bottom:1rem;}
+.clk-t{font-size:48px;font-weight:500;letter-spacing:2px;line-height:1;color:#1a1a1a;}
+.clk-d{font-size:13px;color:#666;margin-top:8px;}
+.lbl{font-size:12px;color:#666;margin-bottom:6px;margin-top:1rem;}
+.lbl:first-child{margin-top:0;}
+.sgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:6px;}
+.sbtn{background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 8px;font-size:13px;color:#1a1a1a;cursor:pointer;text-align:center;transition:all .15s;}
+.sbtn:hover{border-color:#999;background:#fafafa;}
+.sbtn.sel{border:2px solid #1D9E75;background:#E1F5EE;color:#085041;font-weight:500;}
+.agrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+.abtn{border-radius:8px;padding:14px 6px;font-size:13px;font-weight:500;cursor:pointer;text-align:center;border:1px solid #ddd;transition:all .15s;}
+.abtn:hover{opacity:0.85;}
+.abtn.in{background:#E1F5EE;color:#085041;border-color:#5DCAA5;}
+.abtn.out{background:#FAECE7;color:#4A1B0C;border-color:#F0997B;}
+.abtn.oth{background:#E6F1FB;color:#042C53;border-color:#85B7EB;}
+.abtn.sel{outline:3px solid #1D9E75;outline-offset:2px;}
+.sub-btn{width:100%;padding:14px;font-size:15px;font-weight:500;border-radius:8px;cursor:pointer;border:none;background:#1D9E75;color:#fff;margin-top:1rem;transition:background .15s;}
+.sub-btn:hover{background:#0F6E56;}
+.sub-btn:disabled{background:#e0e0d8;color:#999;cursor:not-allowed;}
+.prev{background:#f5f5f0;border-radius:8px;padding:10px 14px;margin-top:10px;display:none;}
+.prev-row{display:flex;justify-content:space-between;padding:4px 0;font-size:13px;}
+.badge{display:inline-block;padding:2px 10px;border-radius:99px;font-size:11px;font-weight:500;}
+.bi{background:#E1F5EE;color:#085041;}
+.bo{background:#FAECE7;color:#4A1B0C;}
+.ba{background:#E6F1FB;color:#042C53;}
+.hi{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:#f5f5f0;border-radius:8px;margin-bottom:6px;}
+.toast{background:#1D9E75;color:#fff;padding:8px 16px;border-radius:8px;font-size:13px;font-weight:500;margin-top:8px;display:none;}
+.toast.on{display:inline-block;}
+.site-title{font-size:13px;color:#666;text-align:center;padding:12px 0 4px;}
+a.admin-link{display:block;text-align:center;font-size:12px;color:#999;margin-top:1.5rem;text-decoration:none;}
+a.admin-link:hover{color:#666;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="site-title">ウェルフォース訪問看護ステーション</div>
+
+  <div class="clock-box">
+    <div class="clk-t" id="clk"></div>
+    <div class="clk-d" id="clk-d"></div>
+  </div>
+
+  <div class="card">
+    <div class="lbl">職員名を選択</div>
+    <div class="sgrid" id="sgrid"></div>
+
+    <div class="lbl" style="margin-top:1rem;">申請内容</div>
+    <div class="agrid">
+      <button class="abtn in" onclick="selAct('出勤',this)">
+        <i class="ti ti-login" style="font-size:20px;display:block;margin-bottom:4px;"></i>出勤
+      </button>
+      <button class="abtn out" onclick="selAct('退勤',this)">
+        <i class="ti ti-logout" style="font-size:20px;display:block;margin-bottom:4px;"></i>退勤
+      </button>
+      <button class="abtn oth" onclick="selAct('各種申請',this)">
+        <i class="ti ti-file-text" style="font-size:20px;display:block;margin-bottom:4px;"></i>各種申請
+      </button>
+    </div>
+
+    <div class="prev" id="prev">
+      <div class="prev-row"><span style="color:#666;">職員名</span><span id="pn" style="font-weight:500;"></span></div>
+      <div class="prev-row"><span style="color:#666;">申請内容</span><span id="pa" style="font-weight:500;"></span></div>
+      <div class="prev-row"><span style="color:#666;">時刻</span><span id="pt" style="font-weight:500;"></span></div>
+    </div>
+
+    <button class="sub-btn" id="subbtn" onclick="doSub()" disabled>打刻する</button>
+    <div><div class="toast" id="toast"></div></div>
+  </div>
+
+  <div class="card">
+    <div class="lbl" style="margin-top:0;">本日の打刻履歴</div>
+    <div id="hist"></div>
+  </div>
+
+  <a href="admin.html" class="admin-link">管理者ページ →</a>
+</div>
+
+<script>
+const STAFF_KEY='tc-staff', RECS_KEY='tc-recs';
+let staffList=['岩本 敬祐','一ノ瀬 志織','三浦 なぎさ','泊 妙香','磯田 佳奈','三井 迅','高橋 圭祐','高橋 沙季'];
+let recs=[];
+let sStaff=null,sAct=null;
+
+function load(){
+  try{const s=localStorage.getItem(STAFF_KEY);if(s)staffList=JSON.parse(s);}catch(e){}
+  try{const r=localStorage.getItem(RECS_KEY);if(r)recs=JSON.parse(r);}catch(e){}
+  renderSGrid();renderHist();
+}
+function saveStaff(){localStorage.setItem(STAFF_KEY,JSON.stringify(staffList));}
+function saveRecs(){localStorage.setItem(RECS_KEY,JSON.stringify(recs));}
+
+function renderSGrid(){
+  document.getElementById('sgrid').innerHTML=staffList.map(n=>`<button class="sbtn" onclick="selStaff('${n.replace(/'/g,"\\'")}',this)">${n}</button>`).join('');
+}
+
+function selStaff(n,el){
+  sStaff=n;
+  document.querySelectorAll('.sbtn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');upPrev();
+}
+function selAct(a,el){
+  sAct=a;
+  document.querySelectorAll('.abtn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');upPrev();
+}
+function upPrev(){
+  const p=document.getElementById('prev'),b=document.getElementById('subbtn');
+  if(sStaff&&sAct){
+    p.style.display='block';
+    document.getElementById('pn').textContent=sStaff;
+    document.getElementById('pa').textContent=sAct;
+    document.getElementById('pt').textContent=nowStr();
+    b.disabled=false;
+  }else{p.style.display='none';b.disabled=true;}
+}
+function nowStr(){return new Date().toLocaleTimeString('ja-JP',{hour:'2-digit',minute:'2-digit'});}
+function todayStr(){return new Date().toLocaleDateString('ja-JP',{year:'numeric',month:'2-digit',day:'2-digit'}).replace(/\//g,'-');}
+
+function doSub(){
+  recs.unshift({id:Date.now(),name:sStaff,action:sAct,date:todayStr(),time:nowStr(),ts:new Date().toISOString()});
+  saveRecs();renderHist();
+  showToast(`${sStaff}の${sAct}を記録しました`);
+  sStaff=null;sAct=null;
+  document.querySelectorAll('.sbtn,.abtn').forEach(b=>b.classList.remove('sel'));
+  document.getElementById('prev').style.display='none';
+  document.getElementById('subbtn').disabled=true;
+}
+
+function renderHist(){
+  const today=todayStr();
+  const list=recs.filter(r=>r.date===today);
+  const el=document.getElementById('hist');
+  if(!list.length){el.innerHTML='<div style="font-size:13px;color:#999;text-align:center;padding:16px;">まだ打刻はありません</div>';return;}
+  el.innerHTML=list.slice(0,20).map(r=>`<div class="hi"><div><div style="font-weight:500;">${r.name}</div><div style="font-size:12px;color:#666;">${r.time}</div></div><span class="badge ${r.action==='出勤'?'bi':r.action==='退勤'?'bo':'ba'}">${r.action}</span></div>`).join('');
+}
+
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('on');setTimeout(()=>t.classList.remove('on'),2500);}
+
+function updateClock(){
+  const n=new Date();
+  document.getElementById('clk').textContent=n.toLocaleTimeString('ja-JP');
+  const days=['日','月','火','水','木','金','土'];
+  document.getElementById('clk-d').textContent=`${n.getFullYear()}年${n.getMonth()+1}月${n.getDate()}日（${days[n.getDay()]}）`;
+  if(sStaff&&sAct)document.getElementById('pt').textContent=nowStr();
+}
+
+load();updateClock();setInterval(updateClock,1000);
+</script>
+</body>
+</html>

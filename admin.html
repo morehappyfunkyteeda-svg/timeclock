@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>管理者パネル — ウェルフォース訪問看護ステーション</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;color:#1a1a1a;background:#f5f5f0;min-height:100vh;}
+.wrap{max-width:720px;margin:0 auto;padding:1rem;}
+.card{background:#fff;border:1px solid #e0e0d8;border-radius:12px;padding:1.25rem;margin-bottom:1rem;}
+.page-title{font-size:18px;font-weight:500;margin-bottom:1rem;display:flex;align-items:center;gap:8px;}
+.tab-row{display:flex;gap:6px;margin-bottom:1rem;flex-wrap:wrap;}
+.tab{padding:7px 16px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;transition:all .15s;}
+.tab:hover{background:#f5f5f0;}
+.tab.on{background:#f0f0ea;color:#1a1a1a;font-weight:500;border-color:#bbb;}
+.lbl{font-size:12px;color:#666;margin-bottom:6px;}
+.sarow{display:flex;align-items:center;justify-content:space-between;padding:8px 10px;background:#f5f5f0;border-radius:8px;margin-bottom:6px;}
+.dl-btn{padding:4px 10px;font-size:12px;border-radius:8px;border:1px solid #f0a0a0;color:#c00;background:#fff;cursor:pointer;}
+.dl-btn:hover{background:#fff0f0;}
+.add-row{display:flex;gap:8px;margin-top:10px;}
+.add-row input{flex:1;padding:8px 10px;border-radius:8px;border:1px solid #ddd;font-size:13px;}
+.add-btn{padding:8px 16px;font-size:13px;font-weight:500;border-radius:8px;border:none;background:#1D9E75;color:#fff;cursor:pointer;}
+.frow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:1rem;}
+.frow select,.frow input[type=date],.frow input[type=month]{padding:7px 10px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#1a1a1a;}
+.reset-btn{padding:7px 12px;font-size:13px;border-radius:8px;border:1px solid #ddd;background:#fff;color:#666;cursor:pointer;}
+.tbl{width:100%;border-collapse:collapse;font-size:12px;table-layout:fixed;}
+.tbl th{background:#f5f5f0;padding:7px 8px;text-align:left;font-weight:500;border-bottom:1px solid #e0e0d8;color:#666;}
+.tbl td{padding:7px 8px;border-bottom:1px solid #eee;color:#1a1a1a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.row-act{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid #eee;}
+.row-act:last-child{border-bottom:none;}
+.badge{display:inline-block;padding:2px 9px;border-radius:99px;font-size:11px;font-weight:500;}
+.bi{background:#E1F5EE;color:#085041;}
+.bo{background:#FAECE7;color:#4A1B0C;}
+.ba{background:#E6F1FB;color:#042C53;}
+.ei{padding:5px 7px;font-size:12px;border-radius:8px;border:1px solid #ddd;width:70px;}
+.sv-btn{padding:4px 10px;font-size:12px;border-radius:8px;border:none;background:#378ADD;color:#fff;cursor:pointer;}
+.print-btn{padding:8px 18px;font-size:13px;font-weight:500;border-radius:8px;border:none;background:#1D9E75;color:#fff;cursor:pointer;}
+.pt-title{font-size:16px;font-weight:500;margin-bottom:1rem;padding-bottom:8px;border-bottom:1px solid #e0e0d8;}
+.pt-sub{font-size:13px;font-weight:500;color:#666;margin:1rem 0 4px;}
+a.back-link{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:#666;text-decoration:none;margin-bottom:1rem;}
+a.back-link:hover{color:#1a1a1a;}
+.empty{font-size:13px;color:#999;text-align:center;padding:16px;}
+.section-title{font-size:14px;font-weight:500;margin-bottom:12px;display:flex;align-items:center;gap:6px;}
+@media print{
+  .tab-row,.frow,.no-print,a.back-link{display:none!important;}
+  .card{border:none;box-shadow:none;padding:0;}
+  body{background:#fff;}
+  .tbl th{background:#f0f0f0;}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <a href="index.html" class="back-link no-print"><i class="ti ti-arrow-left"></i>打刻ページへ戻る</a>
+  <div class="page-title"><i class="ti ti-settings"></i>管理者パネル</div>
+
+  <div class="tab-row no-print">
+    <button class="tab on" onclick="showTab('t-staff',this)"><i class="ti ti-users"></i> 職員管理</button>
+    <button class="tab" onclick="showTab('t-rec',this)"><i class="ti ti-edit"></i> 記録編集</button>
+    <button class="tab" onclick="showTab('t-print',this)"><i class="ti ti-printer"></i> 印刷・集計</button>
+  </div>
+
+  <!-- 職員管理 -->
+  <div id="t-staff">
+    <div class="card">
+      <div class="section-title"><i class="ti ti-users"></i>職員一覧</div>
+      <div id="sa-list"></div>
+      <div class="add-row">
+        <input type="text" id="new-name" placeholder="新しい職員名を入力" />
+        <button class="add-btn" onclick="addStaff()"><i class="ti ti-plus"></i> 追加</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 記録編集 -->
+  <div id="t-rec" style="display:none;">
+    <div class="card">
+      <div class="section-title"><i class="ti ti-edit"></i>打刻記録の編集・削除</div>
+      <div class="frow no-print">
+        <select id="rf-staff" onchange="renderRec()"><option value="">全職員</option></select>
+        <input type="date" id="rf-date" onchange="renderRec()" />
+        <button class="reset-btn" onclick="rfReset()">リセット</button>
+      </div>
+      <div id="rec-list"></div>
+    </div>
+  </div>
+
+  <!-- 印刷・集計 -->
+  <div id="t-print" style="display:none;">
+    <div class="card no-print">
+      <div class="section-title"><i class="ti ti-printer"></i>印刷・集計設定</div>
+      <div class="frow">
+        <select id="pt-type">
+          <option value="both">両方まとめて印刷</option>
+          <option value="daily">日付別 全員一覧</option>
+          <option value="monthly">職員別 月次勤務表</option>
+        </select>
+        <select id="pt-staff"><option value="">全職員</option></select>
+        <input type="month" id="pt-month" />
+        <button class="print-btn" onclick="buildPrint()"><i class="ti ti-printer"></i> 印刷</button>
+      </div>
+    </div>
+    <div id="print-out"></div>
+  </div>
+</div>
+
+<script>
+const STAFF_KEY='tc-staff', RECS_KEY='tc-recs';
+let staffList=['岩本 敬祐','一ノ瀬 志織','三浦 なぎさ','泊 妙香','磯田 佳奈','三井 迅','高橋 圭祐','高橋 沙季'];
+let recs=[];
+
+function load(){
+  try{const s=localStorage.getItem(STAFF_KEY);if(s)staffList=JSON.parse(s);}catch(e){}
+  try{const r=localStorage.getItem(RECS_KEY);if(r)recs=JSON.parse(r);}catch(e){}
+  renderSA();renderPtFilters();
+}
+function saveStaff(){localStorage.setItem(STAFF_KEY,JSON.stringify(staffList));}
+function saveRecs(){localStorage.setItem(RECS_KEY,JSON.stringify(recs));}
+
+function showTab(id,btn){
+  ['t-staff','t-rec','t-print'].forEach(t=>{document.getElementById(t).style.display='none';});
+  document.getElementById(id).style.display='block';
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  if(id==='t-rec')renderRec();
+  if(id==='t-print')renderPtFilters();
+}
+
+function renderSA(){
+  document.getElementById('sa-list').innerHTML=staffList.length
+    ? staffList.map((n,i)=>`<div class="sarow"><span style="font-size:13px;">${n}</span><button class="dl-btn" onclick="delStaff(${i})"><i class="ti ti-trash"></i> 削除</button></div>`).join('')
+    : '<div class="empty">職員がいません</div>';
+}
+
+function delStaff(i){
+  if(!confirm(`「${staffList[i]}」を削除しますか？`))return;
+  staffList.splice(i,1);
+  saveStaff();renderSA();renderPtFilters();
+}
+
+function addStaff(){
+  const v=document.getElementById('new-name').value.trim();
+  if(!v)return;
+  if(staffList.includes(v)){alert('既に存在します');return;}
+  staffList.push(v);
+  document.getElementById('new-name').value='';
+  saveStaff();renderSA();renderPtFilters();
+}
+
+function renderRec(){
+  const sf=document.getElementById('rf-staff').value;
+  const df=document.getElementById('rf-date').value;
+  const sel=document.getElementById('rf-staff');
+  const cur=sel.value;
+  sel.innerHTML='<option value="">全職員</option>'+staffList.map(n=>`<option${n===cur?' selected':''}>${n}</option>`).join('');
+  const list=recs.filter(r=>(!sf||r.name===sf)&&(!df||r.date===df));
+  const el=document.getElementById('rec-list');
+  if(!list.length){el.innerHTML='<div class="empty">該当する記録がありません</div>';return;}
+  el.innerHTML=list.slice(0,80).map(r=>`<div class="row-act">
+    <span class="badge ${r.action==='出勤'?'bi':r.action==='退勤'?'bo':'ba'}" style="min-width:60px;text-align:center;">${r.action}</span>
+    <span style="font-size:12px;font-weight:500;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${r.name}</span>
+    <span style="font-size:12px;color:#666;white-space:nowrap;">${r.date}</span>
+    <input class="ei" type="text" value="${r.time}" id="ei-${r.id}" />
+    <button class="sv-btn" onclick="saveTime(${r.id})">保存</button>
+    <button class="dl-btn" onclick="delRec(${r.id})"><i class="ti ti-trash"></i></button>
+  </div>`).join('');
+}
+
+function rfReset(){document.getElementById('rf-date').value='';renderRec();}
+
+function saveTime(id){
+  const i=recs.findIndex(r=>r.id===id);if(i===-1)return;
+  const v=document.getElementById('ei-'+id).value.trim();if(!v)return;
+  recs[i].time=v;saveRecs();renderRec();
+}
+
+function delRec(id){
+  if(!confirm('この記録を削除しますか？'))return;
+  recs=recs.filter(r=>r.id!==id);saveRecs();renderRec();
+}
+
+function renderPtFilters(){
+  const sel=document.getElementById('pt-staff');
+  sel.innerHTML='<option value="">全職員</option>'+staffList.map(n=>`<option value="${n}">${n}</option>`).join('');
+  const now=new Date();
+  if(!document.getElementById('pt-month').value)
+    document.getElementById('pt-month').value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+
+function buildPrint(){
+  const type=document.getElementById('pt-type').value;
+  const sf=document.getElementById('pt-staff').value;
+  const month=document.getElementById('pt-month').value;
+  const filtered=recs.filter(r=>(!sf||r.name===sf)&&(!month||r.date.startsWith(month)));
+  let html='';
+
+  if(type==='daily'||type==='both'){
+    html+=`<div class="card"><div class="pt-title">日付別 打刻一覧　${month}</div>`;
+    const byDate={};
+    filtered.forEach(r=>{if(!byDate[r.date])byDate[r.date]=[];byDate[r.date].push(r);});
+    const dates=Object.keys(byDate).sort();
+    if(!dates.length){html+='<div class="empty">データがありません</div>';}
+    else{dates.forEach(d=>{
+      html+=`<div class="pt-sub">${d}</div>
+      <table class="tbl" style="margin-bottom:12px;">
+        <thead><tr><th style="width:38%;">職員名</th><th style="width:27%;">申請内容</th><th style="width:20%;">時刻</th></tr></thead>
+        <tbody>${byDate[d].map(r=>`<tr><td>${r.name}</td><td>${r.action}</td><td>${r.time}</td></tr>`).join('')}</tbody>
+      </table>`;
+    });}
+    html+='</div>';
+    if(type==='both')html+='<div style="height:2rem;"></div>';
+  }
+
+  if(type==='monthly'||type==='both'){
+    html+=`<div class="card"><div class="pt-title">職員別 月次勤務表　${month}</div>`;
+    const targets=sf?[sf]:staffList;
+    let any=false;
+    targets.forEach(name=>{
+      const nr=filtered.filter(r=>r.name===name);
+      if(!nr.length)return;
+      any=true;
+      const byD={};
+      nr.forEach(r=>{if(!byD[r.date])byD[r.date]=[];byD[r.date].push(r);});
+      html+=`<div class="pt-sub">${name}</div>
+      <table class="tbl" style="margin-bottom:16px;">
+        <thead><tr><th style="width:26%;">日付</th><th style="width:25%;">出勤</th><th style="width:25%;">退勤</th><th style="width:24%;">その他</th></tr></thead>
+        <tbody>${Object.keys(byD).sort().map(d=>{
+          const dr=byD[d];
+          const inn=dr.filter(r=>r.action==='出勤').map(r=>r.time).join(' ');
+          const out=dr.filter(r=>r.action==='退勤').map(r=>r.time).join(' ');
+          const oth=dr.filter(r=>r.action==='各種申請').map(r=>r.time).join(' ');
+          return `<tr><td>${d}</td><td>${inn||'—'}</td><td>${out||'—'}</td><td>${oth||''}</td></tr>`;
+        }).join('')}</tbody>
+      </table>`;
+    });
+    if(!any)html+='<div class="empty">データがありません</div>';
+    html+='</div>';
+  }
+
+  document.getElementById('print-out').innerHTML=html;
+  setTimeout(()=>window.print(),200);
+}
+
+load();
+</script>
+</body>
+</html>
